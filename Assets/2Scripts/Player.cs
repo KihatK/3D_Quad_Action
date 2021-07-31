@@ -13,11 +13,16 @@ public class Player : MonoBehaviour
     bool isBorder;
     bool wDown;
     bool jDown;
+    bool iDown;
     bool isJump;
     bool isDodge;
 
     Vector3 moveVec;
     Vector3 dodgeVec;
+
+    GameObject nearObject;
+
+    public bool[] hasWeapons;
 
     private void Awake() {
         rigid = GetComponent<Rigidbody>();
@@ -38,6 +43,7 @@ public class Player : MonoBehaviour
         Turn();
         Jump();
         Dodge();
+        Interaction();
     }
 
     void GetInput() {
@@ -45,6 +51,7 @@ public class Player : MonoBehaviour
         vAxis = Input.GetAxisRaw("Vertical");
         wDown = Input.GetButton("Walk");
         jDown = Input.GetButtonDown("Jump");
+        iDown = Input.GetButtonDown("Interaction");
     }
 
     void Move() {
@@ -90,6 +97,24 @@ public class Player : MonoBehaviour
     void DodgeOut() {
         speed *= 0.5f;
         isDodge = false;
+    }
+
+    void Interaction() {
+        if (iDown && nearObject != null && !isJump && !isDodge) {
+            if (nearObject.tag == "Weapon") {
+                Item item = nearObject.GetComponent<Item>();
+                int weaponIndex = item.value;
+                hasWeapons[weaponIndex] = true;
+
+                Destroy(nearObject);
+            }
+        }
+    }
+
+    private void OnTriggerStay(Collider other) {
+        if (other.tag == "Weapon") {
+            nearObject = other.gameObject;
+        }
     }
 
     private void OnCollisionEnter(Collision collision) {
