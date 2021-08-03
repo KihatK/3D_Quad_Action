@@ -27,10 +27,12 @@ public class Player : MonoBehaviour
     bool sDown1;
     bool sDown2;
     bool sDown3;
+    bool fDown;
 
     bool isJump;
     bool isDodge;
     bool isSwap;
+    bool isFireReady = true;
 
     Vector3 moveVec;
     Vector3 dodgeVec;
@@ -41,6 +43,8 @@ public class Player : MonoBehaviour
     Weapon equipWeapon;
     public GameObject[] weapons;
     public bool[] hasWeapons;
+
+    float fireDelay;
 
     private void Awake() {
         rigid = GetComponent<Rigidbody>();
@@ -60,6 +64,7 @@ public class Player : MonoBehaviour
         Move();
         Turn();
         Jump();
+        Attack();
         Dodge();
         Swap();
         Interaction();
@@ -70,6 +75,7 @@ public class Player : MonoBehaviour
         vAxis = Input.GetAxisRaw("Vertical");
         wDown = Input.GetButton("Walk");
         jDown = Input.GetButtonDown("Jump");
+        fDown = Input.GetButton("Fire1");
         iDown = Input.GetButtonDown("Interaction");
         sDown1 = Input.GetButtonDown("Swap1");
         sDown2 = Input.GetButtonDown("Swap2");
@@ -83,7 +89,7 @@ public class Player : MonoBehaviour
             moveVec = dodgeVec;
         }
 
-        if (isSwap) {
+        if (isSwap || !isFireReady) {
             moveVec = Vector3.zero;
         }
 
@@ -106,6 +112,21 @@ public class Player : MonoBehaviour
             isJump = true;
             anim.SetTrigger("doJump");
             anim.SetBool("isJump", isJump);
+        }
+    }
+
+    void Attack() {
+        if (equipWeapon == null) {
+            return;
+        }
+
+        fireDelay += Time.deltaTime;
+        isFireReady = equipWeapon.rate < fireDelay;
+
+        if (fDown && isFireReady && !isDodge && !isSwap) {
+            equipWeapon.Use();
+            anim.SetTrigger(equipWeapon.type == Weapon.Type.Melee ? "doSwing" : "doShot");
+            fireDelay = 0;
         }
     }
 

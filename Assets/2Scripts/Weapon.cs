@@ -4,15 +4,29 @@ using UnityEngine;
 
 public class Weapon : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
+    public enum Type { Melee, Range };
+    public Type type;
+    public BoxCollider meleeArea;
+    public TrailRenderer trailEffect;
+    public int damage;
+    public float rate;
+
+    public void Use() {
+        if (type == Type.Melee) {
+            StopCoroutine("Swing");
+            StartCoroutine("Swing");
+        }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+    IEnumerator Swing() {
+        trailEffect.enabled = true;
+        yield return new WaitForSeconds(0.3f);
+        meleeArea.enabled = true;
+
+        yield return new WaitForSeconds(0.1f);
+        meleeArea.enabled = false;
+
+        yield return new WaitForSeconds(0.1f);
+        trailEffect.enabled = false;
     }
 }
